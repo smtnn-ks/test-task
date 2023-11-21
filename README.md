@@ -12,3 +12,9 @@
 - url: https://smetaninkostya.amocrm.ru/
 - login: smtnn.ks@mail.ru
 - pass: 12341234
+
+URL сервера: http://79.174.92.199/
+
+Пример использования:
+
+![image](./example.png)
