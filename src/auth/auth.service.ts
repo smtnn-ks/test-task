@@ -8,7 +8,7 @@ class Tokens {
 
 @Injectable()
 export class AuthService {
-  tokens: Tokens
+  private tokens: Tokens
 
   constructor() {
     const tokens = JSON.parse(readFileSync('tokens.json').toString())
@@ -17,11 +17,9 @@ export class AuthService {
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
     }
-    console.log(this.tokens)
   }
 
   private get() {
-    console.log('RETURN:', 'Bearer ' + this.tokens.accessToken)
     return 'Bearer ' + this.tokens.accessToken
   }
 
@@ -40,7 +38,7 @@ export class AuthService {
       }),
     })
     const data = await response.json()
-    console.log('TOKENS UPDATED. RECEIVED:', data)
+    console.log('TOKENS UPDATED')
     if (response.status != 200) throw new Error(data)
     this.tokens.accessToken = data.access_token
     this.tokens.refreshToken = data.refresh_token
@@ -56,16 +54,16 @@ export class AuthService {
   async fetchWithAuth(
     route: string,
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-    headers: any,
-    body: any,
+    body?: any,
   ) {
+    console.log('ROUTE:', process.env.DOMAIN + route)
     const callApi = async () =>
       await fetch(process.env.DOMAIN + route, {
         method,
-        headers: {
-          ...headers,
+        headers: new Headers({
+          'Content-Type': 'application/json',
           Authorization: this.get(),
-        },
+        }),
         body: JSON.stringify(body),
       })
 
@@ -75,6 +73,6 @@ export class AuthService {
       response = await callApi()
       if (response.status === 401) throw new Error('Не удалось обновить токены')
     }
-    return await response.json()
+    return response
   }
 }
