@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common'
 import { AuthService } from './auth/auth.service'
+import * as templates from './templates'
 
 @Injectable()
 export class AppService {
@@ -28,29 +29,7 @@ export class AppService {
     const response = await this.authService.fetchWithAuth(
       '/api/v4/contacts',
       'POST',
-      [
-        {
-          name,
-          custom_fields_values: [
-            {
-              field_id: 1439451,
-              values: [
-                {
-                  value: phone,
-                },
-              ],
-            },
-            {
-              field_id: 1439453,
-              values: [
-                {
-                  value: email,
-                },
-              ],
-            },
-          ],
-        },
-      ],
+      templates.createTemplate(name, email, phone),
     )
     const data = await response.json()
     if (response.status !== 200) throw new BadRequestException(data)
@@ -66,27 +45,7 @@ export class AppService {
     const response = await this.authService.fetchWithAuth(
       '/api/v4/contacts/' + id,
       'PATCH',
-      {
-        name,
-        custom_fields_values: [
-          {
-            field_id: 1439451,
-            values: [
-              {
-                value: phone,
-              },
-            ],
-          },
-          {
-            field_id: 1439453,
-            values: [
-              {
-                value: email,
-              },
-            ],
-          },
-        ],
-      },
+      templates.updateTemplate(name, email, phone),
     )
     if (response.status !== 200)
       throw new InternalServerErrorException(await response.json())
@@ -96,17 +55,7 @@ export class AppService {
     const response = await this.authService.fetchWithAuth(
       '/api/v4/leads',
       'POST',
-      [
-        {
-          _embedded: {
-            contacts: [
-              {
-                id,
-              },
-            ],
-          },
-        },
-      ],
+      templates.createLeadTemplate(id),
     )
     if (response.status !== 200)
       throw new InternalServerErrorException(await response.json())
